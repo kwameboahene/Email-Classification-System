@@ -1,0 +1,67 @@
+Private Sub Application_NewMailEx(ByVal EntryIDCollection As String)
+
+
+Dim mailcontent As Outlook.MailItem
+Set mailcontent = Application.Session.GetItemFromID(EntryIDCollection)
+    
+Dim mailbody As String
+Dim mail() As String
+
+Dim vShell As Object
+Dim vExec As Object
+Dim Output As Object
+
+Dim Msg As String
+Dim FinalMsg As String
+
+Dim Command As String
+    
+Dim myNameSpace As Outlook.NameSpace
+Set myNameSpace = Outlook.GetNamespace("MAPI")
+
+Dim myDestF0 As Outlook.Folder
+Dim myDestF1 As Outlook.Folder
+Dim myDestF2 As Outlook.Folder
+
+'Select folders
+Set myDestF0 = myNameSpace.GetDefaultFolder(olFolderInbox).Folders("IT")
+Set myDestF1 = myNameSpace.GetDefaultFolder(olFolderInbox).Folders("OPERATIONS")
+Set myDestF2 = myNameSpace.GetDefaultFolder(olFolderInbox).Folders("OTHER")
+
+'Set content of mail to mailbody
+mailbody = mailcontent.Body
+mail = Split(mailbody, vbNewLine)
+mailbody = Join(mail)
+
+
+
+
+'Call Shell("cmd.exe /S /K  python C:\Classifier\classifiernb.py" & " " & mailbody, vbNormalFocus)
+
+
+Set vShell = CreateObject("Wscript.shell")
+
+Set vExec = vShell.Exec("cmd.exe /C C:\Windows\py.exe C:\Classifier\classifierSVM.py" & " " & """" & mailbody)
+
+
+Set Output = vExec.StdOut
+
+
+Msg = Output.ReadLine
+MsgBox (Msg)
+
+
+If Msg = "IT" Then
+    mailcontent.Move myDestF0
+    
+ElseIf Msg = "Operations" Then
+    mailcontent.Move myDestF1
+    
+ElseIf Msg = "Other" Then
+    mailcontent.Move myDestF2
+End If
+
+
+
+
+End Sub
